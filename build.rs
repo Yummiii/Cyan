@@ -1,3 +1,3 @@
 fn main() {
-    embed_resource::compile("tray-example.rc", embed_resource::NONE);
+    embed_resource::compile("cyan.rc", embed_resource::NONE);
 }

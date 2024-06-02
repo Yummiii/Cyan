@@ -28,15 +28,15 @@ pub async fn run(conn: Connection) -> anyhow::Result<()> {
 }
 
 #[cfg(target_os = "windows")]
-pub async fn run(_conn: Connection) -> anyhow::Result<()> {
+pub async fn run(conn: Connection) -> anyhow::Result<()> {
     use tokio::task;
     use windows::{screenshots, to_tray};
 
-    task::spawn(async move {
-        screenshots::start_watcher().await.unwrap();
+    task::spawn(async {
+        to_tray();
     });
 
-    to_tray();
+    screenshots::start_watcher(conn).await.unwrap();
 
     Ok(())
 }
