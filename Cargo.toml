@@ -10,6 +10,7 @@ tokio = { version = "1.38.0", features = [
     "rt-multi-thread",
     "fs",
     "io-util",
+    "time"
 ] }
 clap = { version = "4.5.4", features = ["derive"] }
 rusqlite = { version = "0.31.0", features = ["bundled"] }
@@ -20,3 +21,7 @@ ashpd = { version = "0.8.1", features = [
     "tokio",
     "wayland",
 ], default-features = false }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+clipboard-win = {version = "5.3.1", features = ["monitor"]}
+image = "0.25.1"

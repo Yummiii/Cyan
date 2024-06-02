@@ -7,7 +7,7 @@ pub fn get() -> anyhow::Result<Connection> {
         "CREATE TABLE IF NOT EXISTS screenshots (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             created_at INTEGER NOT NULL,
-            original_path TEXT not null,
+            original_path TEXT,
             data BLOB NOT NULL
         )",
         (),
