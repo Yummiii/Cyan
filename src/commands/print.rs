@@ -1,8 +1,10 @@
+#[cfg(target_os = "linux")]
 use ashpd::{desktop::screenshot::ScreenshotRequest, WindowIdentifier};
 use chrono::Utc;
 use rusqlite::Connection;
 use tokio::fs;
 
+#[cfg(target_os = "linux")]
 pub async fn run(conn: Connection) -> anyhow::Result<()> {
     let screenshot = ScreenshotRequest::default()
         .identifier(WindowIdentifier::default())

@@ -5,10 +5,6 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.86"
-ashpd = { version = "0.8.1", features = [
-    "tokio",
-    "wayland",
-], default-features = false }
 tokio = { version = "1.38.0", features = [
     "macros",
     "rt-multi-thread",
@@ -18,3 +14,9 @@ tokio = { version = "1.38.0", features = [
 clap = { version = "4.5.4", features = ["derive"] }
 rusqlite = { version = "0.31.0", features = ["bundled"] }
 chrono = "0.4.38"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+ashpd = { version = "0.8.1", features = [
+    "tokio",
+    "wayland",
+], default-features = false }
