@@ -1,6 +1,6 @@
-use rusqlite::Connection;
 use arguments::{Cli, Commands};
 use clap::Parser;
+use rusqlite::Connection;
 
 mod arguments;
 mod commands;
@@ -32,11 +32,17 @@ pub async fn run(conn: Connection, args: Cli) -> anyhow::Result<()> {
     use tokio::task;
     use windows::{screenshots, to_tray};
 
-    task::spawn(async {
-        to_tray();
-    });
+    if let Some(command) = args.command {
+        match command {
+            Commands::Sync => todo!(),
+        }
+    } else {
+        task::spawn(async {
+            to_tray();
+        });
 
-    screenshots::start_watcher(conn).await.unwrap();
+        screenshots::start_watcher(conn).await.unwrap();
+    }
 
     Ok(())
 }
