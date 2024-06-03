@@ -8,5 +8,6 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Commands {
+    #[cfg(target_os = "linux")]
     Print,
 }
