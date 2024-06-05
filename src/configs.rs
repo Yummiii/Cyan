@@ -1,23 +1,23 @@
 use dirs::config_dir;
 use figment::{
-    providers::{Env, Format, Toml},
+    providers::{Env, Format, Serialized, Toml},
     Figment,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Configs {
     pub cyan: CyanConfigs,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CyanConfigs {
     pub delete_after_sync: bool,
 }
 
 impl Configs {
     pub fn get() -> Self {
-        Figment::new()
+        Figment::from(Serialized::defaults(Configs::default()))
             .merge(Env::prefixed("CYAN"))
             .merge(Toml::file(format!(
                 "{}configs.toml",
@@ -25,6 +25,16 @@ impl Configs {
             )))
             .extract()
             .expect("Failed to load configs")
+    }
+}
+
+impl Default for Configs {
+    fn default() -> Self {
+        Self {
+            cyan: CyanConfigs {
+                delete_after_sync: false,
+            },
+        }
     }
 }
 

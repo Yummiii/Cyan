@@ -6,6 +6,7 @@ pub struct Screenshot {
     pub id: u64,
     pub created_at: i64,
     pub original_path: Option<String>,
+    pub synced: bool,
     pub data: Vec<u8>,
 }
 
@@ -17,6 +18,7 @@ pub fn get() -> anyhow::Result<Connection> {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             created_at INTEGER NOT NULL,
             original_path TEXT,
+            synced INTEGER NOT NULL,
             data BLOB NOT NULL
         )",
         (),
