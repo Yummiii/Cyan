@@ -31,7 +31,7 @@ pub async fn run(conn: Connection, args: Cli) -> anyhow::Result<()> {
 
     match args.command {
         Commands::Print => print::run(conn).await,
-        Commands::Sync { delete, sync_path } => sync::run(conn, delete, sync_path).await,
+        Commands::Sync { delete, path } => sync::run(conn, delete, path).await,
     }
 }
 

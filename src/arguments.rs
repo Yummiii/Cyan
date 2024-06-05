@@ -13,7 +13,7 @@ nest! {
                 #[clap(default_value_t = false)]
                 delete: bool,
                 #[arg(short, long)]
-                sync_path: String
+                path: String
             }
         },
     }
