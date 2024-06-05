@@ -1,6 +1,12 @@
 #[cfg(target_os = "linux")]
 pub async fn run(conn: rusqlite::Connection) -> anyhow::Result<()> {
-    use ashpd::{desktop::screenshot::ScreenshotRequest, WindowIdentifier};
+    use ashpd::{
+        desktop::{
+            notification::{Notification, NotificationProxy, Priority},
+            screenshot::ScreenshotRequest,
+        },
+        WindowIdentifier,
+    };
     use chrono::Utc;
     use tokio::fs;
 
@@ -24,6 +30,14 @@ pub async fn run(conn: rusqlite::Connection) -> anyhow::Result<()> {
                 .await?;
             }
         }
+    } else {
+        let notify = Notification::new("Erro ao salvar o print")
+            .default_action(None)
+            .body("yay")
+            // .icon(Icon::Bytes(include_bytes!("/home/yummi/.xdg/pictures/Screenshots/Screenshot from 2024-06-05 01-13-13.png").to_vec()))
+            .priority(Priority::Normal);
+        let proxy = NotificationProxy::new().await?;
+        proxy.add_notification("cyan", notify).await?;
     }
 
     Ok(())
