@@ -13,13 +13,17 @@ tokio = { version = "1.38.0", features = [
     "sync"
 ] }
 clap = { version = "4.5.4", features = ["derive"] }
-rusqlite = { version = "0.31.0", features = ["bundled"] }
+rusqlite = { version = "0.31.0", features = ["bundled-full"] }
 chrono = "0.4.38"
 nestify = "0.3.3"
 figment = { version = "0.10.19", features = ["env", "toml"] }
 serde = { version = "1.0.203", features = ["derive"] }
 dirs = "5.0.1"
 lazy_static = "1.4.0"
+glob = "0.3.1"
+gxhash = { version = "3.4.1", features = ["hybrid"] }
+serde_rusqlite = "0.35.0"
+filetime = "0.2.23"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 ashpd = { version = "0.8.1", features = [

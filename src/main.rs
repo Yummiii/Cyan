@@ -27,11 +27,12 @@ async fn main() -> anyhow::Result<()> {
 
 #[cfg(target_os = "linux")]
 pub async fn run(conn: Connection, args: Cli) -> anyhow::Result<()> {
-    use commands::print;
+    use commands::{add, print};
 
     match args.command {
         Commands::Print => print::run(conn).await,
         Commands::Sync { delete, path } => sync::run(conn, delete, path).await,
+        Commands::Add { path } => add::run(conn, path).await,
     }
 }
 

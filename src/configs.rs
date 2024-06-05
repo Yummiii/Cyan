@@ -13,6 +13,7 @@ pub struct Configs {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CyanConfigs {
     pub delete_after_sync: bool,
+    pub hash_seed: i64,
 }
 
 impl Configs {
@@ -33,6 +34,7 @@ impl Default for Configs {
         Self {
             cyan: CyanConfigs {
                 delete_after_sync: false,
+                hash_seed: 49028922,
             },
         }
     }

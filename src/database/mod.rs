@@ -1,14 +1,7 @@
 use crate::configs::get_configs_dir;
 use rusqlite::Connection;
 
-#[derive(Debug)]
-pub struct Screenshot {
-    pub id: u64,
-    pub created_at: i64,
-    pub original_path: Option<String>,
-    pub synced: bool,
-    pub data: Vec<u8>,
-}
+pub mod screenshot;
 
 pub fn get() -> anyhow::Result<Connection> {
     let conn = Connection::open(format!("{}cyan.db", get_configs_dir()?))?;
@@ -19,6 +12,7 @@ pub fn get() -> anyhow::Result<Connection> {
             created_at INTEGER NOT NULL,
             original_path TEXT,
             synced INTEGER NOT NULL,
+            hash TEXT NOT NULL,
             data BLOB NOT NULL
         )",
         (),

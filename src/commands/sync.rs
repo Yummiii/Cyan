@@ -1,4 +1,4 @@
-use crate::{database::Screenshot, CONFIGS};
+use crate::{database::screenshot::Screenshot, CONFIGS};
 use chrono::{TimeZone, Utc};
 use rusqlite::Connection;
 use std::path::Path;
@@ -13,6 +13,7 @@ pub async fn run(conn: Connection, delete: bool, path: String) -> anyhow::Result
             original_path: r.get(2)?,
             synced: r.get(3)?,
             data: r.get(4)?,
+            hash: "".into(),
         })
     })?;
 

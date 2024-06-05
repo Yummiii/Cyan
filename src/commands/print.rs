@@ -4,6 +4,8 @@ pub async fn run(conn: rusqlite::Connection) -> anyhow::Result<()> {
     use chrono::Utc;
     use tokio::fs;
 
+    use crate::database::screenshot::Screenshot;
+
     let screenshot = ScreenshotRequest::default()
         .identifier(WindowIdentifier::default())
         .interactive(true)
@@ -15,10 +17,11 @@ pub async fn run(conn: rusqlite::Connection) -> anyhow::Result<()> {
     if let Ok(screenshot) = screenshot {
         if let Ok(path) = screenshot.uri().to_file_path() {
             if let Ok(data) = fs::read(&path).await {
-                conn.execute(
-                    "INSERT INTO screenshots (created_at, original_path, synced, data) VALUES (?1, ?2, ?3, ?4)",
-                    (Utc::now().timestamp(), path.to_str().unwrap(), false, data),
-                )?;
+                Screenshot::add(
+                    &conn,
+                    Screenshot::new(Utc::now().timestamp(), Some(path.display()), false, data),
+                )
+                .await?;
             }
         }
     }

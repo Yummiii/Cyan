@@ -14,6 +14,10 @@ nest! {
                 delete: bool,
                 #[arg(short, long)]
                 path: String
+            },
+            Add {
+                #[arg(short, long)]
+                path: String
             }
         },
     }
