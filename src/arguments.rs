@@ -8,6 +8,13 @@ nest! {
         #[clap(subcommand)]
         pub command: pub enum Commands {
             Print,
+            Sync {
+                #[arg(short, long)]
+                #[clap(default_value_t = false)]
+                delete: bool,
+                #[arg(short, long)]
+                sync_path: String
+            }
         },
     }
 }
