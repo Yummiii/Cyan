@@ -1,5 +1,10 @@
+use clap::Parser;
+
+#[derive(Debug, Parser)]
+pub struct PrintArgs;
+
 #[cfg(target_os = "linux")]
-pub async fn run(conn: rusqlite::Connection) -> anyhow::Result<()> {
+pub async fn run(ctx: super::CmdCtx<PrintArgs>) -> anyhow::Result<()> {
     use ashpd::{
         desktop::{
             notification::{Notification, NotificationProxy, Priority},
@@ -24,7 +29,7 @@ pub async fn run(conn: rusqlite::Connection) -> anyhow::Result<()> {
         if let Ok(path) = screenshot.uri().to_file_path() {
             if let Ok(data) = fs::read(&path).await {
                 Screenshot::add(
-                    &conn,
+                    &ctx.db,
                     Screenshot::new(Utc::now().timestamp(), Some(path.display()), false, data),
                 )
                 .await?;
@@ -33,11 +38,12 @@ pub async fn run(conn: rusqlite::Connection) -> anyhow::Result<()> {
     } else {
         let notify = Notification::new("Erro ao salvar o print")
             .default_action(None)
+            // .icon(Icon::Bytes(fs::read("/home/yummi/Downloads/GKBzQv5WkAA7i6F.png").await?))
+            // .icon(Icon::with_names(&["dialog-question-symbolic"]))
             .body("yay")
-            // .icon(Icon::Bytes(include_bytes!("/home/yummi/.xdg/pictures/Screenshots/Screenshot from 2024-06-05 01-13-13.png").to_vec()))
             .priority(Priority::Normal);
         let proxy = NotificationProxy::new().await?;
-        proxy.add_notification("cyan", notify).await?;
+        proxy.add_notification("com.zuraaa.Cyan", notify).await?;
     }
 
     Ok(())

@@ -34,7 +34,8 @@ impl Default for Configs {
         Self {
             cyan: CyanConfigs {
                 delete_after_sync: false,
-                hash_seed: 49028922,
+                //01158544
+                hash_seed: 1158544,
             },
         }
     }

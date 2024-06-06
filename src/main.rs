@@ -2,8 +2,8 @@ use arguments::{Cli, Commands};
 use clap::Parser;
 use commands::sync;
 use configs::Configs;
+use database::Db;
 use lazy_static::lazy_static;
-use rusqlite::Connection;
 
 mod arguments;
 mod commands;
@@ -20,19 +20,19 @@ lazy_static! {
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let args = Cli::parse();
-    let conn = database::get()?;
+    let pool = database::init().await?;
 
-    run(conn, args).await
+    run(pool, args).await
 }
 
 #[cfg(target_os = "linux")]
-pub async fn run(conn: Connection, args: Cli) -> anyhow::Result<()> {
-    use commands::{add, print};
+pub async fn run(pool: Db, args: Cli) -> anyhow::Result<()> {
+    use commands::{add, print, CmdCtx};
 
     match args.command {
-        Commands::Print => print::run(conn).await,
-        Commands::Sync { delete, path } => sync::run(conn, delete, path).await,
-        Commands::Add { path } => add::run(conn, path).await,
+        Commands::Print(args) => print::run(CmdCtx::new(pool, args)).await,
+        Commands::Sync(args) => sync::run(CmdCtx::new(pool, args)).await,
+        Commands::Add(args) => add::run(CmdCtx::new(pool, args)).await,
     }
 }
 

@@ -1,14 +1,14 @@
 use gxhash::gxhash64;
-use rusqlite::Connection;
-use serde::Deserialize;
-use serde_rusqlite::from_rows;
+use sqlx::prelude::FromRow;
 use std::fmt::Display;
 
 use crate::CONFIGS;
 
-#[derive(Debug, Deserialize)]
+use super::Db;
+
+#[derive(Debug, FromRow)]
 pub struct Screenshot {
-    pub id: u64,
+    pub id: i64,
     pub created_at: i64,
     pub original_path: Option<String>,
     pub synced: bool,
@@ -16,6 +16,7 @@ pub struct Screenshot {
     pub data: Vec<u8>,
 }
 
+//someday i will make this better, this day isn't today
 impl Screenshot {
     pub fn new(
         created_at: i64,
@@ -33,28 +34,44 @@ impl Screenshot {
         }
     }
 
-    pub async fn add(conn: &Connection, screenshot: Screenshot) -> anyhow::Result<()> {
-        conn.execute(
-        "INSERT INTO screenshots (created_at, original_path, synced, hash, data) VALUES (?1, ?2, ?3, ?4, ?5)",
-        (
-            screenshot.created_at,
-            screenshot.original_path,
-            screenshot.synced,
-            screenshot.hash,
-            screenshot.data,
-        ),
-    )?;
+    pub async fn add(db: &Db, screenshot: Screenshot) -> anyhow::Result<()> {
+        sqlx::query("INSERT INTO screenshots (created_at, original_path, synced, hash, data) VALUES (?1, ?2, ?3, ?4, ?5)")
+            .bind(screenshot.created_at)
+            .bind(&screenshot.original_path)
+            .bind(screenshot.synced)
+            .bind(&screenshot.hash)
+            .bind(&screenshot.data)
+            .execute(&mut *db.conn().await?).await?;
         Ok(())
     }
 
-    pub async fn from_hash(conn: &Connection, hash: String) -> anyhow::Result<Option<Screenshot>> {
-        let mut stmt = conn.prepare("SELECT * FROM screenshots WHERE hash = ?1")?;
-        let mut screenshots = from_rows::<Screenshot>(stmt.query([hash])?);
+    pub async fn get_all_unsynced(db: &Db) -> anyhow::Result<Vec<Screenshot>> {
+        Ok(sqlx::query_as("SELECT * FROM screenshots WHERE synced = 0")
+            .fetch_all(&mut *db.conn().await?)
+            .await?)
+    }
 
-        if let Some(ss) = screenshots.next() {
-            Ok(Some(ss.unwrap()))
-        } else {
-            Ok(None)
-        }
+    pub async fn delete(db: &Db, id: i64) -> anyhow::Result<()> {
+        sqlx::query("DELETE FROM screenshots WHERE id = ?1")
+            .bind(id)
+            .execute(&mut *db.conn().await?)
+            .await?;
+        Ok(())
+    }
+
+    pub async fn set_synced(db: &Db, id: i64, synced: bool) -> anyhow::Result<()> {
+        sqlx::query("UPDATE screenshots SET synced = ?1 WHERE id = ?2")
+            .bind(id)
+            .bind(synced)
+            .execute(&mut *db.conn().await?)
+            .await?;
+        Ok(())
+    }
+
+    pub async fn from_hash(db: &Db, hash: String) -> anyhow::Result<Option<Screenshot>> {
+        Ok(sqlx::query_as("SELECT * FROM screenshots WHERE hash = ?1")
+            .bind(hash)
+            .fetch_optional(&mut *db.conn().await?)
+            .await?)
     }
 }

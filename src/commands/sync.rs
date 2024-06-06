@@ -1,38 +1,36 @@
+use super::CmdCtx;
 use crate::{database::screenshot::Screenshot, CONFIGS};
 use chrono::{TimeZone, Utc};
-use rusqlite::Connection;
+use clap::{arg, Parser};
 use std::path::Path;
 use tokio::fs;
 
-pub async fn run(conn: Connection, delete: bool, path: String) -> anyhow::Result<()> {
-    let mut stmt = conn.prepare("SELECT * FROM screenshots WHERE synced = 0")?;
-    let screenshots = stmt.query_map([], |r| {
-        Ok(Screenshot {
-            id: r.get(0)?,
-            created_at: r.get(1)?,
-            original_path: r.get(2)?,
-            synced: r.get(3)?,
-            data: r.get(4)?,
-            hash: "".into(),
-        })
-    })?;
+#[derive(Debug, Parser)]
+pub struct SyncArgs {
+    #[arg(short, long)]
+    #[clap(default_value_t = false)]
+    pub delete: bool,
+    #[arg(short, long)]
+    pub path: String,
+}
 
-    for ss in screenshots.flatten() {
+pub async fn run(ctx: CmdCtx<SyncArgs>) -> anyhow::Result<()> {
+    for ss in Screenshot::get_all_unsynced(&ctx.db).await? {
         let timestamp = Utc.timestamp_opt(ss.created_at, 0).unwrap();
 
-        let dir = format!("{}/{}", path, timestamp.format("%Y-%m"));
+        let dir = format!("{}/{}", ctx.args.path, timestamp.format("%Y-%m"));
         let dir = Path::new(&dir);
 
         fs::create_dir_all(&dir).await?;
         fs::write(dir.join(format!("{}.png", ss.created_at)), ss.data).await?;
 
-        if delete || CONFIGS.cyan.delete_after_sync {
+        if ctx.args.delete || CONFIGS.cyan.delete_after_sync {
             if let Some(original) = ss.original_path {
                 fs::remove_file(original).await?;
-                conn.execute("DELETE FROM screenshots WHERE id = ?1", [ss.id])?;
+                Screenshot::delete(&ctx.db, ss.id).await?;
             }
         } else {
-            conn.execute("UPDATE screenshots SET synced = 1 WHERE id = ?1", [ss.id])?;
+            Screenshot::set_synced(&ctx.db, ss.id, true).await?;
         }
     }
 
