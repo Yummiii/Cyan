@@ -25,6 +25,7 @@ pub async fn run(ctx: CmdCtx<AddArgs>) -> anyhow::Result<()> {
     };
 
     for file in files {
+        let file = PathBuf::from(&file);
         if let Ok(data) = fs::read(&file).await {
             if Screenshot::from_hash(&ctx.db, gxhash64(&data, CONFIGS.cyan.hash_seed).to_string())
                 .await?
@@ -33,7 +34,12 @@ pub async fn run(ctx: CmdCtx<AddArgs>) -> anyhow::Result<()> {
                 let time = FileTime::from_last_modification_time(&fs::metadata(&file).await?);
                 Screenshot::add(
                     &ctx.db,
-                    Screenshot::new(time.unix_seconds(), Some(file), false, data),
+                    Screenshot::new(
+                        time.unix_seconds(),
+                        Some(file.canonicalize()?.display()),
+                        false,
+                        data,
+                    ),
                 )
                 .await?;
             }
