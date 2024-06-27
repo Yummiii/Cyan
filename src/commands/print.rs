@@ -20,7 +20,7 @@ pub async fn run(ctx: super::CmdCtx<PrintArgs>) -> anyhow::Result<()> {
     let screenshot = ScreenshotRequest::default()
         .identifier(WindowIdentifier::default())
         .interactive(true)
-        .modal(false)
+        .modal(true)
         .send()
         .await?
         .response();

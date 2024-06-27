@@ -68,7 +68,7 @@ impl Screenshot {
         Ok(())
     }
 
-    pub async fn from_hash(db: &Db, hash: String) -> anyhow::Result<Option<Screenshot>> {
+    pub async fn from_hash(db: &Db, hash: &str) -> anyhow::Result<Option<Screenshot>> {
         Ok(sqlx::query_as("SELECT * FROM screenshots WHERE hash = ?1")
             .bind(hash)
             .fetch_optional(&mut *db.conn().await?)
