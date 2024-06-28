@@ -15,6 +15,7 @@ pub struct SyncArgs {
 }
 
 pub async fn run(ctx: CmdCtx<SyncArgs>) -> anyhow::Result<()> {
+    let mut i = 0;
     for ss in Screenshot::get_all_unsynced(&ctx.db).await? {
         let timestamp = Utc.timestamp_opt(ss.created_at, 0).unwrap();
 
@@ -32,7 +33,11 @@ pub async fn run(ctx: CmdCtx<SyncArgs>) -> anyhow::Result<()> {
         } else {
             Screenshot::set_synced(&ctx.db, ss.id, true).await?;
         }
+
+        println!("Synced: {} [{}]", ss.created_at, ss.hash);
+        i += 1;
     }
+    println!("Synced {} files", i);
 
     Ok(())
 }

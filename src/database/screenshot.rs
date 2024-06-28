@@ -61,8 +61,8 @@ impl Screenshot {
 
     pub async fn set_synced(db: &Db, id: i64, synced: bool) -> anyhow::Result<()> {
         sqlx::query("UPDATE screenshots SET synced = ?1 WHERE id = ?2")
-            .bind(id)
             .bind(synced)
+            .bind(id)
             .execute(&mut *db.conn().await?)
             .await?;
         Ok(())
