@@ -1,3 +1,5 @@
 /target
 cyan.db
+cyan.db-shm
+cyan.db-wal
 /test

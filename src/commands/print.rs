@@ -1,29 +1,29 @@
+use crate::database::screenshot::Screenshot;
+use ashpd::{
+    desktop::{
+        notification::{Notification, NotificationProxy, Priority},
+        screenshot::ScreenshotRequest,
+    },
+    WindowIdentifier,
+};
+use chrono::Utc;
 use clap::Parser;
+use tokio::fs;
 
 #[derive(Debug, Parser)]
 pub struct PrintArgs;
 
-#[cfg(target_os = "linux")]
 pub async fn run(ctx: super::CmdCtx<PrintArgs>) -> anyhow::Result<()> {
-    use ashpd::{
-        desktop::{
-            notification::{Notification, NotificationProxy, Priority},
-            screenshot::ScreenshotRequest,
-        },
-        WindowIdentifier,
-    };
-    use chrono::Utc;
-    use tokio::fs;
-
-    use crate::database::screenshot::Screenshot;
-
     let screenshot = ScreenshotRequest::default()
         .identifier(WindowIdentifier::default())
         .interactive(true)
         .modal(true)
         .send()
-        .await?
-        .response();
+        .await?;
+
+    println!("{:?}", screenshot);
+    let screenshot = screenshot.response();
+    println!("{:?}", screenshot);
 
     if let Ok(screenshot) = screenshot {
         if let Ok(path) = screenshot.uri().to_file_path() {
@@ -36,6 +36,9 @@ pub async fn run(ctx: super::CmdCtx<PrintArgs>) -> anyhow::Result<()> {
             }
         }
     } else {
+        let a = screenshot.unwrap_err();
+        println!("{:?}", a);
+
         let notify = Notification::new("Erro ao salvar o print")
             .default_action(None)
             // .icon(Icon::Bytes(fs::read("/home/yummi/Downloads/GKBzQv5WkAA7i6F.png").await?))
