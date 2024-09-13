@@ -1,9 +1,5 @@
-use gxhash::gxhash64;
 use sqlx::prelude::FromRow;
 use std::fmt::Display;
-
-use crate::CONFIGS;
-
 use super::Db;
 
 #[derive(Debug, FromRow)]
@@ -23,13 +19,14 @@ impl Screenshot {
         original_path: Option<impl Display>,
         synced: bool,
         data: Vec<u8>,
+        hash: String,
     ) -> Self {
         Screenshot {
             id: 0,
             created_at,
             original_path: original_path.map(|p| p.to_string()),
             synced,
-            hash: gxhash64(&data, CONFIGS.cyan.hash_seed).to_string(),
+            hash,
             data,
         }
     }

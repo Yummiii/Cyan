@@ -10,7 +10,6 @@ pub struct SyncArgs {
     #[arg(short, long)]
     #[clap(default_value_t = false)]
     pub delete: bool,
-    #[arg(short, long)]
     pub path: String,
 }
 

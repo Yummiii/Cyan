@@ -1,4 +1,4 @@
-use crate::database::screenshot::Screenshot;
+use crate::{database::screenshot::Screenshot, CONFIGS};
 use ashpd::{
     desktop::{
         notification::{Notification, NotificationProxy, Priority},
@@ -8,6 +8,7 @@ use ashpd::{
 };
 use chrono::Utc;
 use clap::Parser;
+use gxhash::gxhash64;
 use tokio::fs;
 
 #[derive(Debug, Parser)]
@@ -28,9 +29,16 @@ pub async fn run(ctx: super::CmdCtx<PrintArgs>) -> anyhow::Result<()> {
     if let Ok(screenshot) = screenshot {
         if let Ok(path) = screenshot.uri().to_file_path() {
             if let Ok(data) = fs::read(&path).await {
+                let hash = gxhash64(&data, CONFIGS.cyan.hash_seed).to_string();
                 Screenshot::add(
                     &ctx.db,
-                    Screenshot::new(Utc::now().timestamp(), Some(path.display()), false, data),
+                    Screenshot::new(
+                        Utc::now().timestamp(),
+                        Some(path.display()),
+                        false,
+                        data,
+                        hash,
+                    ),
                 )
                 .await?;
             }
