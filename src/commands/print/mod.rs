@@ -7,8 +7,11 @@ mod save;
 
 #[derive(Debug, Parser)]
 pub enum PrintCommand {
+    /// New screenshot
     New,
+    /// List screenshots in the database
     List(list::Args),
+    /// Save the screenshots in the database to a directory
     Save(save::Args),
 }
 

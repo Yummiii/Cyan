@@ -15,7 +15,7 @@ impl_repos!(
 );
 
 pub async fn init_db() -> Pool<Sqlite> {
-    let file = (*CYAN_PATH).join("wallpapers.db");
+    let file = (*CYAN_PATH).join("cyan.db");
 
     if !Path::new(&file).exists() {
         File::create(&file).await.unwrap();

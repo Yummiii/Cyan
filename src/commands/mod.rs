@@ -5,7 +5,8 @@ mod print;
 
 #[derive(Debug, Parser)]
 pub enum Command {
-    Print {
+    /// Commands related to screenshots
+    Prints {
         #[clap(subcommand)]
         command: PrintCommand,
     },
@@ -14,7 +15,7 @@ pub enum Command {
 impl Command {
     pub async fn run(self, conn: Conn) -> anyhow::Result<()> {
         match self {
-            Command::Print { command } => command.run(conn).await,
+            Command::Prints { command } => command.run(conn).await,
         }
     }
 }
