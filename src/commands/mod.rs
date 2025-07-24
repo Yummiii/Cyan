@@ -1,16 +1,20 @@
-use crate::database::Db;
+use crate::{commands::print::PrintCommand, database::Conn};
+use clap::Parser;
 
-pub mod add;
-pub mod print;
-pub mod sync;
+mod print;
 
-pub struct CmdCtx<T> {
-    pub db: Db,
-    pub args: T,
+#[derive(Debug, Parser)]
+pub enum Command {
+    Print {
+        #[clap(subcommand)]
+        command: PrintCommand,
+    },
 }
 
-impl<T> CmdCtx<T> {
-    pub fn new(db: Db, args: T) -> Self {
-        Self { db, args }
+impl Command {
+    pub async fn run(self, conn: Conn) -> anyhow::Result<()> {
+        match self {
+            Command::Print { command } => command.run(conn).await,
+        }
     }
 }

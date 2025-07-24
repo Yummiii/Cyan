@@ -1,36 +1,31 @@
-use crate::configs::get_configs_dir;
-use sqlx::{migrate::MigrateDatabase, pool::PoolConnection, Pool, Sqlite, SqlitePool};
+use crate::{CYAN_PATH, database::screenshots::ScreenshotRepo};
+use lina_rs::macros::impl_repos;
+use sqlx::{Pool, Sqlite, SqlitePool, migrate, pool::PoolConnection};
+use std::path::Path;
+use tokio::fs::File;
 
-pub mod screenshot;
+pub mod screenshots;
 
-pub struct Db {
-    pub pool: Pool<Sqlite>,
-}
+pub type Conn = PoolConnection<Sqlite>;
 
-impl Db {
-    pub async fn conn(&self) -> anyhow::Result<PoolConnection<Sqlite>> {
-        Ok(self.pool.acquire().await?)
+impl_repos!(
+    db = Sqlite,
+    name = Repos,
+    method(name = "screenshot", repo = ScreenshotRepo)
+);
+
+pub async fn init_db() -> Pool<Sqlite> {
+    let file = (*CYAN_PATH).join("wallpapers.db");
+
+    if !Path::new(&file).exists() {
+        File::create(&file).await.unwrap();
     }
-}
 
-pub async fn init() -> anyhow::Result<Db> {
-    let url = format!("sqlite:{}cyan.db", get_configs_dir()?);
-    Sqlite::create_database(&url).await?;
+    let pool = SqlitePool::connect(&format!("sqlite:{}", file.display()))
+        .await
+        .unwrap();
 
-    let pool = SqlitePool::connect(&url).await?;
+    migrate!().run(&pool).await.unwrap();
 
-    sqlx::query(
-        "CREATE TABLE IF NOT EXISTS screenshots (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        created_at INTEGER NOT NULL,
-        original_path TEXT,
-        synced INTEGER NOT NULL,
-        hash TEXT NOT NULL,
-        data BLOB NOT NULL
-    )",
-    )
-    .execute(&mut *pool.acquire().await?)
-    .await?;
-
-    Ok(Db { pool })
+    pool
 }
