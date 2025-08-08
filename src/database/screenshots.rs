@@ -46,10 +46,33 @@ impl ScreenshotRepo {
         Ok(())
     }
 
-    pub async fn list_meta(&mut self) -> anyhow::Result<Vec<ScreenshotMeta>> {
+    pub async fn paginate_meta(
+        &mut self,
+        page: i32,
+        page_size: i32,
+    ) -> anyhow::Result<Vec<ScreenshotMeta>> {
         let screenshots = sqlx::query_as::<_, ScreenshotMeta>(
-            "SELECT id, created_at, hash FROM screenshots ORDER BY created_at DESC",
+            "SELECT id, created_at, hash FROM screenshots ORDER BY created_at DESC LIMIT ? OFFSET ?",
         )
+        .bind(page_size)
+        .bind((page - 1) * page_size)
+        .fetch_all(&mut *self.conn)
+        .await?;
+        Ok(screenshots)
+    }
+
+    pub async fn paginate_meta_saved(
+        &mut self,
+        saved: bool,
+        page: i32,
+        page_size: i32,
+    ) -> anyhow::Result<Vec<ScreenshotMeta>> {
+        let screenshots = sqlx::query_as::<_, ScreenshotMeta>(
+            "SELECT id, created_at, hash FROM screenshots WHERE saved = ? ORDER BY created_at DESC LIMIT ? OFFSET ?",
+        )
+        .bind(saved)
+        .bind(page_size)
+        .bind((page - 1) * page_size)
         .fetch_all(&mut *self.conn)
         .await?;
         Ok(screenshots)
@@ -82,5 +105,21 @@ impl ScreenshotRepo {
             .execute(&mut *self.conn)
             .await?;
         Ok(())
+    }
+
+    pub async fn count_saved(&mut self, saved: bool) -> anyhow::Result<i32> {
+        let count =
+            sqlx::query_scalar::<_, i32>("SELECT COUNT(id) FROM screenshots WHERE saved = ?")
+                .bind(saved)
+                .fetch_one(&mut *self.conn)
+                .await?;
+        Ok(count)
+    }
+
+    pub async fn count(&mut self) -> anyhow::Result<i32> {
+        let count = sqlx::query_scalar::<_, i32>("SELECT COUNT(id) FROM screenshots")
+            .fetch_one(&mut *self.conn)
+            .await?;
+        Ok(count)
     }
 }
