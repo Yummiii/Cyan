@@ -122,4 +122,13 @@ impl ScreenshotRepo {
             .await?;
         Ok(count)
     }
+
+    pub async fn get_latest(&mut self) -> anyhow::Result<Screenshot> {
+        let screenshot = sqlx::query_as::<_, Screenshot>(
+            "SELECT id, created_at, data FROM screenshots ORDER BY created_at DESC LIMIT 1",
+        )
+        .fetch_one(&mut *self.conn)
+        .await?;
+        Ok(screenshot)
+    }
 }

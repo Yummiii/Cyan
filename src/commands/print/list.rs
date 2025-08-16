@@ -11,7 +11,7 @@ pub struct Args {
     #[clap(long, short, default_value_t = false)]
     pub all: bool,
     /// The number of items per page
-    #[clap(long, short = 'l', default_value_t = 10)]
+    #[clap(long, short = 'l', default_value_t = 15)]
     pub page_size: i32,
     /// The page number to display
     #[clap(long, short, default_value_t = 1)]
